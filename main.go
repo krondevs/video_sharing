@@ -211,7 +211,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Limitar tamaño de archivo a 100 MB
-	r.Body = http.MaxBytesReader(w, r.Body, 100<<20) // 100 MB
+	r.Body = http.MaxBytesReader(w, r.Body, 300<<20) // 300 MB
 
 	// Procesar archivo multimedia
 	file, header, err := r.FormFile("multimedia-upload")
