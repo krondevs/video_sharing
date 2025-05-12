@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Videos sharing</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<!-- Video.js CSS -->
+<link href="/static/video-js.min.css" rel="stylesheet">
+<script src="/static/videojs-contrib-media-sources.min.js"></script>
+
+<style>
+  :root {
+  --bg-primary: #0f0f0f;
+  --bg-secondary: #212121;
+  --text-primary: #ffffff;
+  --text-secondary: #aaaaaa;
+  --accent-color: #ff0000;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: #eee !important;
+}
+
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.youtube-layout {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  background-color: var(--bg-primary);
+  padding: 20px 0;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.sidebar-item:hover, .sidebar-item.active {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.sidebar-item i {
+  margin-right: 15px;
+  color: var(--text-secondary);
+}
+
+.sidebar-item span {
+  font-size: 14px;
+}
+
+/* Contenido Principal */
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Barra de Navegación Superior */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.search-container {
+  display: flex;
+}
+
+.search-container input {
+  width: 500px;
+  padding: 10px;
+  background-color: var(--bg-secondary);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-primary);
+}
+
+.search-container button {
+  background-color: rgba(255,255,255,0.1);
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.search-container button i {
+  color: var(--text-secondary);
+}
+
+/* Reproductor de Video */
+.video-player-section {
+  background-color: #000;
+  padding: 20px;
+}
+
+.video-player-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+#main-video {
+  width: 100%;
+  max-height: 33vh;
+}
+
+.video-title {
+  margin-top: 10px;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+/* Cuadrícula de Videos */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: var(--bg-secondary);
+}
+
+.video-card {
+  background-color: var(--bg-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.video-card:hover {
+  transform: scale(1.05);
+}
+
+.video-thumbnail {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background-color: #333;
+}
+
+.video-card-title {
+  padding: 10px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsivo */
+@media (max-width: 1200px) {
+  .sidebar {
+      width: 80px;
+  }
+  .sidebar-item span {
+      display: none;
+  }
+  .search-container input {
+      width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .youtube-layout {
+      flex-direction: column;
+  }
+  .sidebar {
+      width: 100%;
+      height: auto;
+      display: flex;
+      overflow-x: auto;
+      border-right: none;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .sidebar-item {
+      flex: 1;
+      justify-content: center;
+  }
+  .video-grid {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+.multimedia-upload-container {
+      max-width: 180px;
+      margin: 20px auto;
+      padding: 20px;
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .multimedia-upload-input {
+      display: none;
+    }
+
+    .multimedia-upload-label {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+
+    .multimedia-upload-label:hover {
+      background-color: #45a049;
+    }
+
+    .multimedia-upload-progress {
+      width: 100%;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      margin-top: 15px;
+      overflow: hidden;
+      height: 20px;
+      display: none;
+    }
+
+    .multimedia-upload-progress-bar {
+      width: 0%;
+      height: 100%;
+      background-color: #4CAF50;
+      transition: width 0.5s ease-in-out;
+    }
+
+    .multimedia-upload-filename {
+      margin-top: 10px;
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    .upload-error {
+      color: red;
+      margin-top: 10px;
+    }
+</style>
+
+<!-- Video.js JavaScript -->
+<script src="https://vjs.zencdn.net/8.5.2/video.min.js"></script>
+</head>
+<body>
+<div class="youtube-layout">
+  
+    <div class="main-content">
+        <!-- Barra de navegación superior -->
+        <div class="top-nav">
+            <div class="logo">Video Sharing</div>
+            
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search videos...">
+                <button id="search-btn">
+                    <i class="material-icons">search</i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Área de reproducción -->
+        <div class="video-player-section">
+            <div class="video-player-container">
+                <video id="main-video" class="video-js" controls preload="auto">
+                    <p class="vjs-no-js">
+                        Tu navegador no soporta el elemento de video.
+                    </p>
+                </video>
+                <div id="video-title" class="video-title"></div>
+            </div>
+        </div>
+        
+        <!-- Lista de videos -->
+        <div class="video-grid" id="video-list">
+            <!-- Videos se cargarán dinámicamente -->
+        </div>
+    </div>
+</div>
+
+ <script>
+  
+
+document.addEventListener('DOMContentLoaded', () => {
+  const videoList = document.getElementById('video-list');
+  const videoTitle = document.getElementById('video-title');
+  const searchInput = document.getElementById('search-input');
+  const searchBtn = document.getElementById('search-btn');
+
+  // Inicializar Video.js
+  const mainVideo = videojs('main-video', {
+    controlBar: {
+      children: [
+        'playToggle',
+        'volumePanel',
+        'progressControl',
+        'fullscreenToggle',
+        'remainingTimeDisplay'
+      ]
+    }
+  });
+
+  // Lista de videos desde el backend
+  const videos = "{{VIDEO_LIST}}".split(',').filter(v => v.trim());
+
+  // Función para limpiar y formatear nombres de archivos
+  function cleanFileName(fileName) {
+      // Extraer solo el nombre sin la ruta completa
+      const bareFileName = fileName.split('/').pop();
+      
+      // Eliminar extensión
+      const fileNameWithoutExt = bareFileName.replace(/\.[^/.]+$/, '');
+      
+      // Reemplazar guiones y guiones bajos con espacios
+      return fileNameWithoutExt
+          .replace(/[_-]/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ');
+  }
+
+  // Función para crear tarjeta de video
+  function createVideoCard(videoPath) {
+      // Crear elemento de tarjeta
+      const card = document.createElement('div');
+      card.className = 'video-card';
+
+      // Limpiar y formatear nombre del archivo
+      const cleanedFileName = cleanFileName(videoPath);
+
+      // Crear miniatura
+      const thumbnail = document.createElement('img');
+      thumbnail.className = 'video-thumbnail';
+      thumbnail.src = `/static/thumbnails/${encodeURIComponent(videoPath)}.jpg`;
+      thumbnail.alt = cleanedFileName;
+      
+      // Manejar error de carga de imagen
+      thumbnail.onerror = () => {
+          thumbnail.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="250" height="200" fill="%23333"><text x="50%" y="50%" text-anchor="middle" fill="%23888" dy=".3em">No Preview</text></svg>';
+      };
+
+      // Título del video
+      const title = document.createElement('div');
+      title.className = 'video-card-title';
+      title.textContent = cleanedFileName;
+
+      // Agregar miniatura y título a la tarjeta
+      card.appendChild(thumbnail);
+      card.appendChild(title);
+
+      // Evento de clic para reproducir video
+      card.addEventListener('click', () => {
+    const videoSources = [
+        { type: "video/mp4", src: `/static/${videoPath}` },
+        { type: "video/webm", src: `/static/${videoPath}.webm` },
+        { type: "video/x-matroska", src: `/static/${videoPath}.mkv` },
+        { type: "video/avi", src: `/static/${videoPath}.avi` }
+    ].filter(source => source.src.endsWith('.mp4') || source.src.endsWith('.webm') || source.src.endsWith('.mkv') || source.src.endsWith('.avi'));
+
+    if (videoSources.length > 0) {
+        mainVideo.src(videoSources);
+        
+        videoTitle.textContent = cleanedFileName;
+        mainVideo.play().catch(error => {
+            console.error("Error al reproducir el video:", error);
+            //alert("No se pudo reproducir el video. Formato no compatible.");
+        });
+    } else {
+        alert("No hay formatos de video compatibles disponibles.");
+    }
+    });
+
+      return card;
+  }
+
+  // Cargar videos iniciales
+  function loadVideos(videoArray) {
+      // Limpiar lista actual
+      videoList.innerHTML = ` <div class="multimedia-upload-container">
+          <input 
+            type="file" 
+            id="multimedia-upload" 
+            class="multimedia-upload-input" 
+            accept="video/mp4"
+          >
+          <label for="multimedia-upload" class="multimedia-upload-label">
+            Share your video (Max. 100 Mb)
+          </label>
+          <div class="multimedia-upload-filename"><a href="/">Reload website after uploading</a></div>
+          <div class="multimedia-upload-filename" id="filename-display"></div>
+          <div class="multimedia-upload-progress" id="upload-progress-container">
+            <div class="multimedia-upload-progress-bar" id="upload-progress-bar"></div>
+          </div>
+          <div id="upload-error" class="upload-error"></div>
+        </div>`;
+
+      // Agregar cada video
+      videoArray.forEach(videoPath => {
+          if (videoPath.trim()) {
+              videoList.appendChild(createVideoCard(videoPath));
+          }
+      });
+  }
+
+  // Cargar videos iniciales
+  loadVideos(videos);
+
+  // Funcionalidad de búsqueda
+  function performSearch() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const filteredVideos = videos.filter(video => 
+          video.trim() && 
+          cleanFileName(video).toLowerCase().includes(searchTerm)
+      );
+
+      loadVideos(filteredVideos);
+  }
+
+  // Eventos de búsqueda
+  searchBtn.addEventListener('click', performSearch);
+  searchInput.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') performSearch();
+  });
+
+
+
+  document.getElementById('multimedia-upload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      const filenameDisplay = document.getElementById('filename-display');
+      const progressContainer = document.getElementById('upload-progress-container');
+      const progressBar = document.getElementById('upload-progress-bar');
+      const errorDisplay = document.getElementById('upload-error');
+
+      // Limpiar errores anteriores
+      errorDisplay.textContent = '';
+
+      if (file) {
+        filenameDisplay.textContent = file.name;
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+
+        // Crear FormData para subir el archivo
+        const formData = new FormData();
+        formData.append('multimedia-upload', file);
+
+        // Realizar la subida con fetch
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/upload', true);
+
+        // Evento de progreso de subida
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = (event.loaded / event.total) * 100;
+            progressBar.style.width = `${percentComplete}%`;
+          }
+        };
+
+        // Evento de éxito
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            setTimeout(() => {
+              progressContainer.style.display = 'none';
+              //const videos = "{{VIDEO_LIST}}".split(',').filter(v => v.trim());
+              //loadVideos(videos);
+            }, 1000);
+          } else {
+            // Manejar errores
+            errorDisplay.textContent = 'Error uploading file';
+            progressContainer.style.display = 'none';
+          }
+        };
+
+        // Evento de error
+        xhr.onerror = () => {
+          errorDisplay.textContent = 'Error de red uploading file';
+          progressContainer.style.display = 'none';
+        };
+
+        // Enviar el archivo
+        xhr.send(formData);
+      }
+    });
+});
+
+</script>
+
+</body>
+</html>
