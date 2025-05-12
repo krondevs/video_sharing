@@ -408,6 +408,7 @@ func main() {
 		})
 
 		// Llamar al manejador original
+		fmt.Println(r.RemoteAddr)
 		indexHandler(w)
 	})
 
@@ -418,7 +419,7 @@ func main() {
 			http.Error(w, "Acceso no autorizado", http.StatusForbidden)
 			return
 		}
-
+		fmt.Println(r.RemoteAddr, "UPLOADING...")
 		uploadHandler(w, r)
 	})
 
@@ -427,18 +428,21 @@ func main() {
 		// Verificar token de sesión y referer
 		if !hasValidSession(r, validSessions, &sessionMutex) || !hasValidReferer(r) {
 			http.Error(w, "Acceso no autorizado", http.StatusForbidden)
+			fmt.Println(r.RemoteAddr, "NO AUTORIZARDO...")
 			return
 		}
 
 		// No permitir listar directorios
 		if r.URL.Path == "/static/" || r.URL.Path == "/static" {
 			http.Error(w, "Acceso no autorizado", http.StatusForbidden)
+			fmt.Println(r.RemoteAddr, "SIN ACCESO...")
 			return
 		}
 
 		// Servir el archivo estático
 		fs := http.FileServer(http.Dir("."))
 		//r.URL.Path = r.URL.Path
+		fmt.Println(r.RemoteAddr, "SERVING...")
 		fs.ServeHTTP(w, r)
 	})
 
